@@ -1,3 +1,8 @@
+library(htmltools)
+# library(rentrez)
+library(reticulate)
+library(jsonlite)
+
 ################################################################################
 # Generate a formatted list of the update on the publication list
 pubDiff <- function(x, y){
@@ -21,7 +26,6 @@ checkBcunknumber <- function(new, bn){
     hit <- match(new_title, pub_title)
     return(new[is.na(hit), ])
 }
-
 
 makePubList <- function(x, out_fn){
     if(nrow(x) == 0){
@@ -98,6 +102,92 @@ makePubList <- function(x, out_fn){
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
 
+makeHTMLpub <- function(x){
+  if(nrow(x) == 0){
+    publist <- "No publication"
+    
+  } else {
+    
+    x <- tapply(seq_len(nrow(x)), x$doi, function(i){
+      if(length(i) == 1){
+        return(x[i, ])
+      }
+      
+      check <- grepl("Early Access", x$doctype[i])
+      if(any(check)){
+        return(x[i, ][!check, ])
+        
+      } else {
+        return(x[i, ])
+      }
+    })
+    
+    out <- tagList(lapply(X = x, FUN = fmtHTMLentry))
+  }
+  
+  return(out)
+}
+
+fmtHTMLentry <- function(y){
+  lowers <- c("in", "of", "for", "and", "on", "or")
+  # ti <- tolower(strsplit(y$title, "\ ")[[1]])
+  # ti <- sapply(ti, function(z){
+  #   if(z %in% lowers){
+  #     return(z)
+  #   } else {
+  #     return(stringr::str_to_title(z))
+  #   }
+  # })
+  # ti <- paste(ti, collapse = " ")
+  ti <- y$title
+  ti <- gsub(" +", " ", ti)
+  tmp <- data.frame(journal = y$journal,
+                    issue = y$issue,
+                    vol = y$volume,
+                    page = y$pages, 
+                    year = paste0("(", y$year, ")"),
+                    article_no = y$article_no)
+  if(y$doctype == "Early Access"){
+    out <- paste(tmp$journal, "[Online first]", tmp$year, sep = " ")
+    
+  } else {
+    tmp[tmp == ""] <- NA
+    tmp <- subset(tmp, select = !is.na(tmp))
+    if(is.null(tmp$page) & !is.null(tmp$article_no)){
+      artno <- sub("ARTN ?| ?\\[pii\\]| ?\\[doi\\]", "", tmp$article_no)
+      if(!is.null(tmp$issue)){
+        tmp$issue <- paste0("(", tmp$issue, ")")
+      }
+      out <- paste0(tmp$journal,
+                    ", ", 
+                    paste(c(paste0(tmp$vol, tmp$issue), artno), 
+                          collapse = ":"),
+                    " ", tmp$year)
+      
+    } else {
+      if(!is.null(tmp$issue)){
+        tmp$issue <- paste0("(", tmp$issue, ")")
+      }
+      out <- paste0(tmp$journal,
+                    ", ", 
+                    paste(c(paste0(tmp$vol, tmp$issue), tmp$page), collapse = ":"),
+                    " ", tmp$year)
+    }
+  }
+  if(!grepl("\\.$", ti)){
+    ti <- paste0(ti, ".")
+  }
+  doi <- paste0("Doi.org/", y$doi)
+  
+  out <- tags$div(tags$br(y["authors"]), 
+                  tags$br(ti),
+                  tags$br(out),
+                  tags$a(doi, href = paste0("http://", tolower(doi))),
+                  tags$br(),
+                  tags$br())
+  return(out)      
+}
+
 ################################################################################
 # Get publication list
 getIPSRpublist <- function(env_fn = "getIPSRpublist.env", out_dir){
@@ -127,7 +217,6 @@ getIPSRpublist <- function(env_fn = "getIPSRpublist.env", out_dir){
 
 ################################################################################
 # Get publication list from Pubmed
-library(rentrez)
 getIPSRpublistPUBMED <- function(){
     ent <- getEntre()
     med <- sepRecords(ent)
@@ -224,8 +313,6 @@ mat2df <- function(x){
 
 ################################################################################
 # Get publication list from Web of Science
-library(reticulate)
-library(jsonlite)
 getIPSRpublistWOS <- function(env_fn = "getIPSRpublist.env", limit = 50){
     env_df <- read.csv(env_fn, header = FALSE, row.names = 1)
     options(reticulate.conda_binary = env_df["conda_binary", 1])
@@ -300,7 +387,6 @@ getIPSRpublistWOS <- function(env_fn = "getIPSRpublist.env", limit = 50){
 
 ################################################################################
 # Get publication list
-library(rentrez)
 getAUpublist <- function(au, dp){
     today <- Sys.Date()
     ent <- .getAUentre(au = au, dp = dp)
