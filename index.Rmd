@@ -1,21 +1,27 @@
 ---
-title: トップページ名
+title: Latest publications
 ---
 
-## index
+---
 
-### さんぷる
+```{r echo=FALSE}
+source("~/ipsrpublistr/R/Functions_ipsrPubList.R")
+library(rmarkdown)
 
-- ほげ
-- ふが
+latest <- read.table(file = "~/ipsrpublistr/latest_publist", header = FALSE, sep = "\t")
+previous <- read.table(file = "~/ipsrpublistr/previous_publist", header = FALSE, sep = "\t")
 
-### さんぷるさんぷる
+latest <- read.csv(file = unlist(latest), header = TRUE)
+previous <- read.csv(file = unlist(previous), header = TRUE)
 
-あめんぼあかいなあいうえお。あめんぼあかいなあいうえお。あああああああああああああああああああああああああああああ。
+update_list <- pubDiff(x = latest, y = previous)
+update_list <- makeHTMLpub(x = update_list)
+update_list <- as.character(update_list)
+update_list <- gsub("<br>", "", update_list)
+write.table(x = update_list, file = "latest.html", 
+            sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
-あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ。
+htmltools::includeHTML("latest.html")
+```
 
-## ふがふが
-
-ああああああああああああああああああああああああああああああああああ。あああああああああああああああああああ
-
+---

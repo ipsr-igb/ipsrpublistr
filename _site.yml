@@ -3,10 +3,11 @@ name: "IPSR publication list"
 navbar:
   title: "IPSR pulication list"
   left:
-    - text: "List"
+    - text: "Latest"
       href: index.html
-    - text: "Metrics"
-      href: metrics.html
+    - text: "Full list"
+      href: full.html
+      
 
 output:
   html_document:
