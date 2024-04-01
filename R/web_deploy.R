@@ -1,4 +1,5 @@
 source("R/Functions_ipsrPubList.R")
+library(rmarkdown)
 
 prev_fn <- read.table("latest_publist")
 
