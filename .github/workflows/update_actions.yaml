@@ -43,6 +43,7 @@ jobs:
             any::rentrez
             any::reticulate
             any::jsonlite
+            any::rmarkdown
 
       # Execute the web_deploy.R script.
       - name: Render Rmarkdown files and Commit Results
