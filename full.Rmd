@@ -1,14 +1,14 @@
 ---
-title: Full publication list
+title: Full publication list.
 ---
 
 ---
 
 ```{r echo=FALSE}
-source("~/ipsrpublistr/R/Functions_ipsrPubList.R")
+source("R/Functions_ipsrPubList.R")
 library(rmarkdown)
 
-latest <- read.table(file = "~/ipsrpublistr/latest_publist", header = FALSE, sep = "\t")
+latest <- read.table(file = "latest_publist", header = FALSE, sep = "\t")
 latest <- read.csv(file = unlist(latest), header = TRUE)
 
 year_list <- sort(unique(latest$year))

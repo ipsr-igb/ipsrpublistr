@@ -5,11 +5,11 @@ title: Latest publications
 ---
 
 ```{r echo=FALSE}
-source("~/ipsrpublistr/R/Functions_ipsrPubList.R")
+source("R/Functions_ipsrPubList.R")
 library(rmarkdown)
 
-latest <- read.table(file = "~/ipsrpublistr/latest_publist", header = FALSE, sep = "\t")
-previous <- read.table(file = "~/ipsrpublistr/previous_publist", header = FALSE, sep = "\t")
+latest <- read.table(file = "latest_publist", header = FALSE, sep = "\t")
+previous <- read.table(file = "previous_publist", header = FALSE, sep = "\t")
 
 latest <- read.csv(file = unlist(latest), header = TRUE)
 previous <- read.csv(file = unlist(previous), header = TRUE)

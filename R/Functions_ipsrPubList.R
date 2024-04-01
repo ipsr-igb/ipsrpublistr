@@ -1,5 +1,5 @@
 library(htmltools)
-# library(rentrez)
+library(rentrez)
 library(reticulate)
 library(jsonlite)
 
@@ -32,7 +32,7 @@ makePubList <- function(x, out_fn){
         publist <- "No publication"
     } else {
         lowers <- c("in", "of", "for", "and", "on", "or")
-        
+
         x <- tapply(seq_len(nrow(x)), x$doi, function(i){
             if(length(i) == 1){
                 return(x[i, ])
@@ -45,7 +45,7 @@ makePubList <- function(x, out_fn){
             }
         })
         x <- do.call("rbind", x)
-        
+
         publist <- apply(x, 1, function(y){
             ti <- tolower(strsplit(y["title"], "\ ")[[1]])
             ti <- sapply(ti, function(z){
@@ -60,7 +60,7 @@ makePubList <- function(x, out_fn){
             tmp <- data.frame(journal = y["journal"],
                               issue = y["issue"],
                               vol = y["volume"],
-                              page = y["pages"], 
+                              page = y["pages"],
                               year = paste0("(", y["year"], ")"),
                               article_no = y["article_no"])
             if(y["doctype"] == "Early Access"){
@@ -74,17 +74,17 @@ makePubList <- function(x, out_fn){
                         tmp$issue <- paste0("(", tmp$issue, ")")
                     }
                     out <- paste0(tmp$journal,
-                                  ", ", 
-                                  paste(c(paste0(tmp$vol, tmp$issue), artno), 
+                                  ", ",
+                                  paste(c(paste0(tmp$vol, tmp$issue), artno),
                                         collapse = ":"),
                                   " ", tmp$year)
-                    
+
                 } else {
                     if(!is.null(tmp$issue)){
                         tmp$issue <- paste0("(", tmp$issue, ")")
                     }
                     out <- paste0(tmp$journal,
-                                  ", ", 
+                                  ", ",
                                   paste(c(paste0(tmp$vol, tmp$issue), tmp$page), collapse = ":"),
                                   " ", tmp$year)
                 }
@@ -92,39 +92,39 @@ makePubList <- function(x, out_fn){
             if(!grepl("\\.$", ti)){
                 ti <- paste0(ti, ".")
             }
-            out <- c(y["authors"], ti, 
+            out <- c(y["authors"], ti,
                      out, paste0("Doi.org/", y["doi"]), "")
             return(out)
         })
     }
 
-    write.table(as.vector(publist), out_fn, 
+    write.table(as.vector(publist), out_fn,
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
 
 makeHTMLpub <- function(x){
   if(nrow(x) == 0){
     publist <- "No publication"
-    
+
   } else {
-    
+
     x <- tapply(seq_len(nrow(x)), x$doi, function(i){
       if(length(i) == 1){
         return(x[i, ])
       }
-      
+
       check <- grepl("Early Access", x$doctype[i])
       if(any(check)){
         return(x[i, ][!check, ])
-        
+
       } else {
         return(x[i, ])
       }
     })
-    
+
     out <- tagList(lapply(X = x, FUN = fmtHTMLentry))
   }
-  
+
   return(out)
 }
 
@@ -144,12 +144,12 @@ fmtHTMLentry <- function(y){
   tmp <- data.frame(journal = y$journal,
                     issue = y$issue,
                     vol = y$volume,
-                    page = y$pages, 
+                    page = y$pages,
                     year = paste0("(", y$year, ")"),
                     article_no = y$article_no)
   if(y$doctype == "Early Access"){
     out <- paste(tmp$journal, "[Online first]", tmp$year, sep = " ")
-    
+
   } else {
     tmp[tmp == ""] <- NA
     tmp <- subset(tmp, select = !is.na(tmp))
@@ -159,17 +159,17 @@ fmtHTMLentry <- function(y){
         tmp$issue <- paste0("(", tmp$issue, ")")
       }
       out <- paste0(tmp$journal,
-                    ", ", 
-                    paste(c(paste0(tmp$vol, tmp$issue), artno), 
+                    ", ",
+                    paste(c(paste0(tmp$vol, tmp$issue), artno),
                           collapse = ":"),
                     " ", tmp$year)
-      
+
     } else {
       if(!is.null(tmp$issue)){
         tmp$issue <- paste0("(", tmp$issue, ")")
       }
       out <- paste0(tmp$journal,
-                    ", ", 
+                    ", ",
                     paste(c(paste0(tmp$vol, tmp$issue), tmp$page), collapse = ":"),
                     " ", tmp$year)
     }
@@ -178,14 +178,14 @@ fmtHTMLentry <- function(y){
     ti <- paste0(ti, ".")
   }
   doi <- paste0("Doi.org/", y$doi)
-  
-  out <- tags$div(tags$br(y["authors"]), 
+
+  out <- tags$div(tags$br(y["authors"]),
                   tags$br(ti),
                   tags$br(out),
                   tags$a(doi, href = paste0("http://", tolower(doi))),
                   tags$br(),
                   tags$br())
-  return(out)      
+  return(out)
 }
 
 ################################################################################
@@ -194,7 +194,7 @@ getIPSRpublist <- function(env_fn = "getIPSRpublist.env", out_dir){
     env_df <- read.csv(env_fn, header = FALSE, row.names = 1)
     today <- Sys.Date()
     out_fn <- paste0(out_dir, "/", env_df["out_fn", 1], "_", today, ".csv")
-    
+
     pubmed <- getIPSRpublistPUBMED()
     # wos <- getIPSRpublistWOS(env_fn = env_fn)
     # names(wos)[names(wos) == "source_title"] <- "journal"
@@ -226,25 +226,25 @@ getIPSRpublistPUBMED <- function(){
 }
 
 getEntre <- function(){
-    ent <- entrez_search("pubmed", 
+    ent <- entrez_search("pubmed",
                          '"Institute of Plant Science and Resources"[AFFL]')
     if(ent$count > ent$retmax){
-        ent <- entrez_search("pubmed", 
-                             '"Institute of Plant Science and Resources"[AFFL]', 
+        ent <- entrez_search("pubmed",
+                             '"Institute of Plant Science and Resources"[AFFL]',
                              retmax = ent$count)
     }
-    
+
     hits <- NULL
     job <- as.numeric(cut(1:ent$count, breaks = as.integer(ent$count/50, 1)))
     job[is.na(job)] <- max(job) + 1
     for(i in unique(job)){
         if(is.null(hits)){
             hits <- entrez_fetch(db = "pubmed",
-                                 id = ent$ids[job == i], 
+                                 id = ent$ids[job == i],
                                  rettype = "medline")
         } else {
             hits <- paste(hits, entrez_fetch(db = "pubmed",
-                                             id = ent$ids[job == i], 
+                                             id = ent$ids[job == i],
                                              rettype = "medline"), sep = "\n")
         }
     }
@@ -320,11 +320,11 @@ getIPSRpublistWOS <- function(env_fn = "getIPSRpublist.env", limit = 50){
     source_python(env_df["source_python", 1])
     key <- as.character(read.table(env_df["key_fn", 1]))
     query <- env_df["query", 1]
-    
+
     df <- NULL
     page <- 1
     while(TRUE){
-        wos <- getWOS(key = key, 
+        wos <- getWOS(key = key,
                       query = query,
                       limit = as.integer(limit),
                       page = as.integer(page))
@@ -419,23 +419,23 @@ getAUpublist <- function(au, dp){
     if(ent$count > ent$retmax){
         ent <- entrez_search("pubmed", query, retmax = ent$count)
     }
-    
+
     hits <- NULL
     if(ent$count <= 50){
         job <- rep(1, ent$count)
     } else {
         job <- as.numeric(cut(1:ent$count, breaks = ceiling(ent$count/50)))
     }
-    
+
     job[is.na(job)] <- max(job) + 1
     for(i in unique(job)){
         if(is.null(hits)){
             hits <- entrez_fetch(db = "pubmed",
-                                 id = ent$ids[job == i], 
+                                 id = ent$ids[job == i],
                                  rettype = "medline")
         } else {
             hits <- paste(hits, entrez_fetch(db = "pubmed",
-                                             id = ent$ids[job == i], 
+                                             id = ent$ids[job == i],
                                              rettype = "medline"), sep = "\n")
         }
     }
@@ -510,7 +510,7 @@ au_mat2df <- function(x, au){
         article_no <- grep("\\[doi\\]", article_no, invert = TRUE, value = TRUE)
         if(length(article_no) == 0){
             article_no <- NA
-        } 
+        }
         pub_date <- y[y[, 1] %in% "DP", 2]
         doctype <- y[y[, 1] %in% "PT", 2][1]
         doi <- sub(" \\[doi\\]", "", y[grep("\\[doi\\]", y[, 2]), 2][1])
@@ -525,9 +525,9 @@ au_mat2df <- function(x, au){
         if(length(pub_date) == 0){pub_date <- NA}
         if(length(doctype) == 0){doctype <- NA}
         if(length(doi) == 0){doi <- NA}
-        return(data.frame(query = hit_ath, 
+        return(data.frame(query = hit_ath,
                           address = hit_add,
-                          authors = ath, 
+                          authors = ath,
                           title = title, journal = journal,
                           issue = issue, volume = vol, pages = pages,
                           article_no = article_no,
