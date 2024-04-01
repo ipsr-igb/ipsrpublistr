@@ -47,7 +47,7 @@ jobs:
       # Execute the web_deploy.R script.
       - name: Render Rmarkdown files and Commit Results
         run: |
-        Rscript R/web_deploy.R
+        Rscript -e 'source(R/web_deploy.R)'
         git config --local user.name "$GITHUB_ACTOR"
         git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
         git add -u
