@@ -1,0 +1,38 @@
+---
+title: Full publication list
+---
+
+---
+
+```{r echo=FALSE}
+source("~/ipsrpublistr/R/Functions_ipsrPubList.R")
+library(rmarkdown)
+
+latest <- read.table(file = "~/ipsrpublistr/latest_publist", header = FALSE, sep = "\t")
+latest <- read.csv(file = unlist(latest), header = TRUE)
+
+year_list <- sort(unique(latest$year))
+for(i in seq_along(year_list)){
+  year_pub <- makeHTMLpub(x = subset(x = latest, subset = year == year_list[i]))
+  
+  if(i == 1){
+    full_list <- tagList(tags$h2(year_list[i]),
+                         year_pub,
+                         tags$hr())
+  } else {
+    full_list <- tagList(tags$h2(year_list[i]),
+                         year_pub,
+                         tags$hr(),
+                         full_list)
+  }
+}
+
+full_list <- as.character(full_list)
+full_list <- gsub("<br>", "", full_list)
+write.table(x = full_list, file = "full.html", 
+            sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+htmltools::includeHTML("full.html")
+```
+
+---
