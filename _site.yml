@@ -18,6 +18,7 @@ output:
       collapse: false
     df_print: "kable"
     include:
+      before_body: header.html
       after_body: footer.html
 
 output_dir: "."
