@@ -31,7 +31,7 @@ full_list <- as.character(full_list)
 full_list <- gsub("<br>", "", full_list)
 write.table(x = full_list, file = "full.html", 
             sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
-
+print(Sys.Date())
 htmltools::includeHTML("full.html")
 ```
 
