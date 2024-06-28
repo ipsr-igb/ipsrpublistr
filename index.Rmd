@@ -20,7 +20,7 @@ update_list <- as.character(update_list)
 update_list <- gsub("<br>", "", update_list)
 write.table(x = update_list, file = "latest.html", 
             sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
-print("Last update:", Sys.Date())
+cat("Last update:", as.character(Sys.Date()))
 htmltools::includeHTML("latest.html")
 ```
 
