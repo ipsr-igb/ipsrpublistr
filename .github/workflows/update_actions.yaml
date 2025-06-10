@@ -9,7 +9,7 @@ on:
   schedule:
     # 分 時 日 月 曜日 コマンド  UTC時間
     # 毎日日本時間3時に実行(設定時間の9時間後が日本時間になる)
-    - cron: '0 15 28 * *'
+    - cron: '0 15 27 * *'
 
 permissions:
   contents: write
