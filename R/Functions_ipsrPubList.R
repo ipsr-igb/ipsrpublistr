@@ -147,7 +147,7 @@ fmtHTMLentry <- function(y){
                     page = y$pages,
                     year = paste0("(", y$year, ")"),
                     article_no = y$article_no)
-  if(y$doctype == "Early Access"){
+  if("Early Access" %in% y$doctype){
     out <- paste(tmp$journal, "[Online first]", tmp$year, sep = " ")
 
   } else {
