@@ -14,9 +14,14 @@ previous <- read.table(file = "previous_publist", header = FALSE, sep = "\t")
 latest <- read.csv(file = unlist(latest), header = TRUE)
 previous <- read.csv(file = unlist(previous), header = TRUE)
 
-update_list <- pubDiff(x = latest, y = previous)
-update_list <- makeHTMLpub(x = update_list)
-update_list <- as.character(update_list)
+update_list <- pubDiff(x = latest, y = latest)
+if(nrow(update_list) == 0){
+  update_list <- "No publication"
+  
+} else {
+  update_list <- makeHTMLpub(x = update_list)
+  update_list <- as.character(update_list)
+}
 update_list <- gsub("<br>", "", update_list)
 write.table(x = update_list, file = "latest.html", 
             sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
